@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédle 2</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-red-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="bg-slate-800/90 backdrop-blur-md border-b border-slate-700 sticky top-0 z-20 shadow-md">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full border-2 border-slate-900 bg-white overflow-hidden relative shadow-inner">
+                    <div class="absolute inset-x-0 top-0 h-1/2 bg-red-600 border-b-2 border-slate-900"></div>
+                    <div class="absolute inset-x-0 bottom-0 h-1/2 bg-white"></div>
+                    <div class="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-900 -translate-y-1/2"></div>
+                    <div class="absolute left-1/2 top-1/2 w-2.5 h-2.5 rounded-full bg-white border-2 border-slate-900 -translate-x-1/2 -translate-y-1/2 z-10"></div>
+                </div>
+                <h1 class="text-xl font-black tracking-wider text-white uppercase">Pokédle <span class="text-red-500 text-sm font-bold tracking-normal border border-red-500/30 bg-red-500/10 px-2 py-0.5 rounded">2</span></h1>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="open-settings-btn" class="flex items-center space-x-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold py-1.5 px-3 rounded-lg border border-slate-600 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    <span>Gens / Settings</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col items-center">
+        
+        <!-- Stats Banner -->
+        <div class="w-full flex justify-between items-center bg-slate-800/80 backdrop-blur-md border border-slate-700/60 rounded-xl p-3 mb-6 shadow-sm">
+            <div class="flex items-center space-x-6 text-xs font-medium">
+                <div>
+                    <span class="text-slate-400">Target Pool:</span>
+                    <span id="pool-count" class="font-bold text-red-400 ml-1">0</span>
+                </div>
+                <div>
+                    <span class="text-slate-400">Guesses:</span>
+                    <span id="guess-count" class="font-bold text-blue-400 ml-1">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="post-win-actions" class="hidden w-full flex justify-center gap-3 mb-8">
+            <button id="show-victory-btn" class="bg-slate-700 hover:bg-slate-600 text-slate-100 font-semibold text-xs py-2 px-4 rounded-lg border border-slate-600 transition">
+                Show Win Screen
+            </button>
+            <button id="new-game-btn" class="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs py-2 px-4 rounded-lg shadow transition">
+                Play Again
+            </button>
+        </div>
+
+        <!-- Search / Input Form -->
+        <div class="w-full max-w-md relative mb-8">
+            <form id="guess-form" class="relative">
+                <input 
+                    type="text" 
+                    id="pokemon-input" 
+                    placeholder="Type a Pokémon name..." 
+                    autocomplete="off"
+                    class="w-full bg-slate-800/90 backdrop-blur-md border-2 border-slate-700 rounded-xl px-4 py-3.5 pl-11 pr-24 text-sm focus:outline-none focus:border-red-500 transition shadow-inner placeholder-slate-500 text-white"
+                >
+                <div class="absolute left-3.5 top-3.5 text-slate-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <button 
+                    type="submit" 
+                    class="absolute right-2 top-2 bg-red-600 hover:bg-red-500 text-white font-semibold text-xs py-2 px-4 rounded-lg shadow transition transform active:scale-95"
+                >
+                    Guess
+                </button>
+            </form>
+
+            <!-- Autocomplete Dropdown -->
+            <ul id="autocomplete-list" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-slate-800/95 backdrop-blur-md border border-slate-700 rounded-xl max-h-60 overflow-y-auto z-30 shadow-2xl divide-y divide-slate-700/50">
+            </ul>
+        </div>
+
+        <!-- Guesses Grid / Table -->
+        <div class="w-full overflow-x-auto pb-4">
+            <div class="min-w-[780px]">
+                <!-- Table Headers -->
+                <div class="grid grid-cols-8 gap-2 mb-3 text-center text-xs font-bold text-slate-300 uppercase tracking-wider bg-slate-800/60 backdrop-blur-sm py-2 rounded-xl border border-slate-700/60">
+                    <div>Pokémon</div>
+                    <div>Gen</div>
+                    <div>Type 1</div>
+                    <div>Type 2</div>
+                    <div>Color</div>
+                    <div>Evolution</div>
+                    <div>Height</div>
+                    <div>Weight</div>
+                </div>
+
+                <!-- Guess Rows Container -->
+                <div id="guesses-container" class="space-y-2">
+                    <!-- Dynamic Guess Rows Inject Here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Generation Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <span>Select Generations</span>
+                </h3>
+                <button id="close-settings-btn" class="text-slate-400 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-400 mb-4">Choose which Pokémon generations will be included in the hidden target pool.</p>
+
+            <div class="flex justify-between mb-4 text-xs">
+                <button id="select-all-btn" class="text-red-400 hover:underline">Select All</button>
+                <button id="deselect-all-btn" class="text-slate-400 hover:underline">Deselect All</button>
+            </div>
+
+            <div id="generations-list" class="grid grid-cols-2 gap-2 mb-6">
+                <!-- Checkboxes populated by JS -->
+            </div>
+
+            <div class="flex justify-end space-x-3 border-t border-slate-700 pt-4">
+                <button id="apply-settings-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-xl text-sm transition">
+                    Apply & Start New Game
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Modal -->
+    <div id="victory-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative overflow-hidden">
+            <button id="close-victory-btn" class="absolute top-3 right-3 text-slate-400 hover:text-white transition" aria-label="Close victory modal">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="w-24 h-24 mx-auto mb-3 relative">
+                <img id="victory-pokemon-img" class="w-full h-full object-contain filter drop-shadow-lg" src="" alt="Target Pokemon">
+            </div>
+            <h2 class="text-2xl font-black text-white uppercase tracking-wide mb-1" id="victory-pokemon-name">Pokémon</h2>
+            <p class="text-xs text-green-400 font-semibold mb-4">You caught the secret Pokémon!</p>
+
+            <div class="bg-slate-900/50 p-3 rounded-xl mb-6 text-xs flex justify-center">
+                <div class="p-2">
+                    <span class="text-slate-400 block mb-0.5">Total Guesses</span>
+                    <span id="final-guess-count" class="text-lg font-black text-white">0</span>
+                </div>
+            </div>
+
+            <button id="play-again-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-sm shadow-lg transition">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- JavaScript Files Loading Order -->
+    <script src="data/pokemonData.js"></script>
+    <script src="js/gameEngine.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
